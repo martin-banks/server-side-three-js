@@ -1,0 +1,51 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Three.js</title>
+  <style>
+    html, body {
+      font-size: 16px;
+      font-family: sans-serif;
+    }
+    #canvasWrapper {
+      border: solid 1px pink;
+      padding: 1rem;
+    }
+    img {
+      width: 1000px;
+      height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hello there</h1>
+  <ul></ul>
+
+  <div id="canvasWrapper">
+    <img />
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io()
+    const list = document.querySelector('ul')
+
+    function newListItem (msg) {
+      const item = document.createElement('li')
+      item.innerText = msg
+      return item
+    }
+
+    // socket.on('test-message', msg => {
+    //   list.appendChild(newListItem(msg))
+    // })
+
+    const img = document.querySelector('img')
+    socket.on('test-canvas', canvas => {
+      console.log('canvas recieved', canvas)
+      img.setAttribute('src', canvas)
+    })
+  </script>
+</body>
+</html>
