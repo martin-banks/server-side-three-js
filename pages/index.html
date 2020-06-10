@@ -7,30 +7,80 @@
     html, body {
       font-size: 16px;
       font-family: sans-serif;
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     #canvasWrapper {
-      border: solid 1px pink;
-      padding: 1rem;
+      border: solid 1px lime;
+      padding: 0;
+    }
+    canvas {
+      outline: solid 1px purple;
     }
     img {
-      width: 1000px;
-      height: 200px;
+      /* position: absolute; */
+      top: 0;
+      left: 0;
+      width: 500px;
+      height: 500px;
+      outline: solid 2px pink;
+    }
+    input {
+      /* position: absolute; */
+      top: 100px;
+      left: 100px;
+      padding: 0.5rem;
+      z-index: 99;
     }
   </style>
 </head>
+
 <body>
-  <h1>Hello there</h1>
+  <!-- <h1>Hello there</h1> -->
   <ul></ul>
 
   <input type="text" />
 
+  <img />
   <div id="canvasWrapper">
-    <img />
+    <canvas width="500" height="500"></canvas>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // Returns a function, that, as long as it continues to be invoked, will not
+    // be triggered. The function will be called after it stops being called for
+    // N milliseconds. If `immediate` is passed, trigger the function on the
+    // leading edge, instead of the trailing.
+    function debounce (func, wait, immediate) {
+      let timeout = null
+      return function () {
+        let context = this
+        let args = arguments
+        let later = function () {
+          timeout = null
+          if (!immediate) {
+            func.apply(context, args)
+          }
+        }
+        var callNow = immediate && !timeout
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+        if (callNow) {
+          func.apply(context, args)
+        }
+      }
+    }
+
+
     const socket = io()
+    socket.emit('screen-size', { width: window.innerWidth, height: window.innerHeight })
     const list = document.querySelector('ul')
 
     function newListItem (msg) {
@@ -44,8 +94,24 @@
     // })
 
     const img = document.querySelector('img')
-    socket.on('test-canvas', canvas => {
-      img.setAttribute('src', canvas)
+    const canvasWrapper = document.querySelector('#canvasWrapper')
+
+    var myCanvas = document.querySelector('#canvasWrapper canvas')
+    var ctx = myCanvas.getContext('2d')
+
+    const canvasImage = new Image
+    function updateCanvasImage (data) {
+      ctx.clearRect(0, 0, 500, 500)
+      canvasImage.src = data
+      canvasImage.onload = function () {
+        ctx.drawImage(canvasImage, 0, 0) // Or at whatever offset you like
+      }
+    }
+
+
+    socket.on('test-canvas', data => {
+      img.setAttribute('src', data)
+      updateCanvasImage(data)
     })
 
     let arrowKeysDown = null
@@ -60,8 +126,8 @@
       }
       socket.emit('typing', input.value)
     })
-    
-    
+
+
     function sendMoveCommand (direction) {
       clearInterval(arrowKeysDown)
       arrowKeysDown = setInterval(() => {
@@ -96,6 +162,12 @@
 
       socket.emit('typing', input.value)
     })
+
+
+    // document.addEventListener('mousemove', debounce(e => {
+    //   const { clientX, clientY } = e
+    //   socket.emit('mouse-move', { clientX, clientY })
+    // }), 32)
   </script>
 </body>
 </html>
