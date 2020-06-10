@@ -47,7 +47,7 @@
 
   <input type="text" />
 
-  <img />
+  <!-- <img /> -->
   <div id="canvasWrapper">
     <canvas width="500" height="500"></canvas>
   </div>
@@ -110,7 +110,7 @@
 
 
     socket.on('test-canvas', data => {
-      img.setAttribute('src', data)
+      // img.setAttribute('src', data)
       updateCanvasImage(data)
     })
 
@@ -164,10 +164,11 @@
     })
 
 
-    // document.addEventListener('mousemove', debounce(e => {
-    //   const { clientX, clientY } = e
-    //   socket.emit('mouse-move', { clientX, clientY })
-    // }), 32)
+
+    document.addEventListener('mousemove', debounce(e => {
+      const { clientX, clientY } = e
+      socket.emit('mouse-move', { clientX: clientX - myCanvas.offsetLeft, clientY: clientY - myCanvas.offsetTop })
+    }), 32)
   </script>
 </body>
 </html>
