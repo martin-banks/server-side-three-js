@@ -22,6 +22,8 @@
   <h1>Hello there</h1>
   <ul></ul>
 
+  <input type="text" />
+
   <div id="canvasWrapper">
     <img />
   </div>
@@ -43,8 +45,56 @@
 
     const img = document.querySelector('img')
     socket.on('test-canvas', canvas => {
-      console.log('canvas recieved', canvas)
       img.setAttribute('src', canvas)
+    })
+
+    let arrowKeysDown = null
+
+    const input = document.querySelector('input')
+    document.addEventListener('keyup', function (e) {
+      const { keyCode } = e
+
+      if (keyCode === 37 || keyCode === 38 || keyCode === 39 || keyCode === 40) {
+        clearInterval(arrowKeysDown)
+        return
+      }
+      socket.emit('typing', input.value)
+    })
+    
+    
+    function sendMoveCommand (direction) {
+      clearInterval(arrowKeysDown)
+      arrowKeysDown = setInterval(() => {
+        socket.emit(`move-${direction}`, 1)
+      }, 32)
+    }
+
+    document.addEventListener('keydown', function (e) {
+      const { keyCode } = e
+
+      if (keyCode === 37 || keyCode === 38 || keyCode === 39 || keyCode === 40) {
+        e.preventDefault()
+        console.log('Moving text')
+        if (keyCode === 37) {
+          // Left arrow
+          sendMoveCommand('left')
+        }
+        if (keyCode === 39) {
+          // Right arrow
+          sendMoveCommand('right')
+        }
+        if (keyCode === 38) {
+          // Up arrow
+          sendMoveCommand('up')
+        }
+        if (keyCode === 40) {
+          // Down arrow
+          sendMoveCommand('down')
+        }
+        return
+      }
+
+      socket.emit('typing', input.value)
     })
   </script>
 </body>

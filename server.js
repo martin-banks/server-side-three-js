@@ -14,7 +14,7 @@ ctx.font = '24px Impact'
 // ctx.fillText('Awesome!', 50, 100)
 
 // Draw line under text
-var text = ctx.measureText('Awesome!')
+const text = ctx.measureText('Awesome!')
 ctx.strokeStyle = 'rgba(0,0,0, 0.5)'
 ctx.beginPath()
 ctx.lineTo(50, 102)
@@ -39,6 +39,15 @@ function testMessage () {
 }
 
 
+const pos = { x: 10, y: 10 }
+let textValue = ''
+
+function updateImage () {
+  ctx.clearRect(0, 0, width, height)
+  ctx.fillText(textValue, pos.x, pos.y)
+  io.emit('test-canvas', canvas.toDataURL())
+  io.emit('test-canvas', canvas.toDataURL())
+}
 
 // Start io connection
 io.on('connection', socket => {
@@ -46,20 +55,44 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     console.log('user disconnected')
   })
-  io.emit('test-canvas', canvas.toDataURL())
-  
-  const msgLoop = setInterval(() => {
-    // io.emit('test-message', testMessage())
-    ctx.clearRect(0, 0, width, height)
-    ctx.fillText(testMessage(), 0, 100)
-    io.emit('test-canvas', canvas.toDataURL())
-  }, 16)
+  // io.emit('test-canvas', canvas.toDataURL())
 
-  setTimeout(() => {
-    clearInterval(msgLoop)
-  }, 10 * 1000)
+  // const msgLoop = setInterval(() => {
+  //   // io.emit('test-message', testMessage())
+  //   ctx.clearRect(0, 0, width, height)
+  //   ctx.fillText(testMessage(), 0, 100)
+  //   io.emit('test-canvas', canvas.toDataURL())
+  // }, 16)
 
+  // setTimeout(() => {
+  //   clearInterval(msgLoop)
+  // }, 10 * 1000)
+
+  socket.on('move-left', x => {
+    pos.x -= 5
+    updateImage()
+  })
+  socket.on('move-right', x => {
+    pos.x += 5
+    updateImage()
+  })
+  socket.on('move-up', x => {
+    pos.y -= 5
+    updateImage()
+  })
+  socket.on('move-down', x => {
+    pos.y += 5
+    updateImage()
+  })
+
+
+  socket.on('typing', value => {
+    textValue = value
+    updateImage()
+  })
 })
+
+
 
 
 // Start server
